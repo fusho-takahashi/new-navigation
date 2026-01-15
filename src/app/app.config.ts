@@ -1,5 +1,10 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter, withExperimentalPlatformNavigation } from '@angular/router';
+import {
+  provideRouter,
+  withComponentInputBinding,
+  withExperimentalPlatformNavigation,
+  withInMemoryScrolling,
+} from '@angular/router';
 
 import { routes } from './app.routes';
 
@@ -8,6 +13,11 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     // withExperimentalPlatformNavigation() を使用してブラウザの Navigation API と統合
     // これにより、RouterLink なしの <a> タグでも SPA ナビゲーションとして動作する
-    provideRouter(routes, withExperimentalPlatformNavigation()),
+    provideRouter(
+      routes,
+      withExperimentalPlatformNavigation(),
+      withInMemoryScrolling({ scrollPositionRestoration: 'enabled' }),
+      withComponentInputBinding()
+    ),
   ],
 };

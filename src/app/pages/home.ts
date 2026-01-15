@@ -1,50 +1,34 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { Item } from '../services/mock-api.service';
 
 @Component({
   selector: 'app-home',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink],
   template: `
     <div class="page">
-      <h1>Home</h1>
+      <h1>Home - アイテム一覧</h1>
       <p>
-        このページは <code>withExperimentalPlatformNavigation()</code> のデモです。
+        このページは resolver でデータをフェッチしています。
+        コンソールでフェッチ回数を確認できます。
       </p>
 
-      <section class="feature-section">
-        <h2>Navigation API の特徴</h2>
-        <ul>
-          <li>
-            <strong>RouterLink なしのアンカータグをインターセプト:</strong>
-            通常の &lt;a href="/path"&gt; タグでも SPA ナビゲーションとして動作します。
-          </li>
-          <li>
-            <strong>ネイティブのスクロール復元:</strong>
-            ブラウザの組み込み機能でスクロール位置が復元されます。
-          </li>
-          <li>
-            <strong>進行中のナビゲーション通知:</strong>
-            アクセシビリティアナウンスやローディングインジケーターなどが利用可能になります。
-          </li>
-        </ul>
+      <section class="info-section">
+        <h2>resolver フェッチのデモ</h2>
+        <p>
+          アイテムをクリックして詳細ページへ遷移し、ブラウザの「戻る」ボタンで
+          戻ってきてください。<strong>再度フェッチが走る</strong>ことを確認できます。
+        </p>
       </section>
 
-      <!-- スクロール復元デモ用の長いコンテンツ -->
-      <section class="demo-content">
-        <h2>スクロール復元のデモ</h2>
-        <p>
-          このページを下にスクロールしてから他のページに移動し、
-          ブラウザの「戻る」ボタンで戻ってきてください。
-          スクロール位置が自動的に復元されます。
-        </p>
-        @for (i of items; track i) {
-          <div class="card">
-            <h3>セクション {{ i }}</h3>
-            <p>
-              これはスクロール復元をデモするためのコンテンツです。
-              Navigation API を使用すると、ブラウザがネイティブで
-              スクロール位置を管理してくれます。
-            </p>
-          </div>
+      <section class="items-section">
+        <h2>アイテム一覧</h2>
+        @for (item of items(); track item.id) {
+          <a class="card" [routerLink]="['/item', item.id]">
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.description }}</p>
+          </a>
         }
       </section>
     </div>
@@ -101,9 +85,28 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
       margin: 0 0 0.5rem;
       color: #1976d2;
     }
+
+    a.card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    a.card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .info-section {
+      background: #fff3e0;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin: 2rem 0;
+    }
   `,
 })
 export class HomePage {
-  // スクロールデモ用のアイテム
-  protected readonly items = Array.from({ length: 10 }, (_, i) => i + 1);
+  // resolver から受け取るデータ（withComponentInputBinding 経由）
+  items = input.required<Item[]>();
 }

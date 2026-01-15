@@ -1,7 +1,6 @@
-import { Routes } from '@angular/router';
-
-// ローディングインジケーターのデモ用に遅延を追加する resolver
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+import { inject } from '@angular/core';
+import { ActivatedRouteSnapshot, Routes } from '@angular/router';
+import { MockApiService } from './services/mock-api.service';
 
 export const routes: Routes = [
   {
@@ -10,23 +9,28 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/home').then((m) => m.HomePage),
     title: 'Home - Navigation API Demo',
     resolve: {
-      delay: () => delay(3000),
+      // MockApiService でアイテム一覧を取得
+      items: () => inject(MockApiService).getItems(),
+    },
+  },
+  {
+    path: 'item/:id',
+    loadComponent: () => import('./pages/item-detail').then((m) => m.ItemDetailPage),
+    title: 'Item Detail - Navigation API Demo',
+    resolve: {
+      // MockApiService で単一アイテムを取得
+      item: (route: ActivatedRouteSnapshot) =>
+        inject(MockApiService).getItem(Number(route.params['id'])),
     },
   },
   {
     path: 'about',
     loadComponent: () => import('./pages/about').then((m) => m.AboutPage),
     title: 'About - Navigation API Demo',
-    resolve: {
-      delay: () => delay(3000),
-    },
   },
   {
     path: 'contact',
     loadComponent: () => import('./pages/contact').then((m) => m.ContactPage),
     title: 'Contact - Navigation API Demo',
-    resolve: {
-      delay: () => delay(3000),
-    },
   },
 ];
