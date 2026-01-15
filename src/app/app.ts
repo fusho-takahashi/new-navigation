@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -31,11 +31,19 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
       </nav>
     </header>
 
-    <main>
-      <router-outlet />
-    </main>
+    <div class="main-content" [attr.inert]="isNavigating() || null">
+      @if (isNavigating()) {
+        <div class="loading-overlay" role="status" aria-label="ページを読み込み中">
+          <div class="spinner"></div>
+          <p>Loading...</p>
+        </div>
+      }
 
-    <footer class="footer">
+      <main>
+        <router-outlet />
+      </main>
+
+      <footer class="footer">
       <p>
         Angular v21 - <code>withExperimentalPlatformNavigation()</code> Demo
       </p>
@@ -77,6 +85,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
         ネイティブ UI（タブスピナー、停止ボタン等）が反応します。
       </p>
     </footer>
+    </div>
   `,
   styles: `
     :host {
@@ -136,6 +145,10 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
       font-weight: 600;
     }
 
+    .main-content {
+      position: relative;
+    }
+
     main {
       min-height: calc(100vh - 250px);
     }
@@ -190,6 +203,46 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
     .comparison-table .no {
       color: #999;
     }
+
+    /* ローディングオーバーレイ（ヘッダー以外を覆う） */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.9);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 50; /* ヘッダー(100)より下 */
+      gap: 1rem;
+    }
+
+    .loading-overlay p {
+      margin: 0;
+      font-size: 1rem;
+      color: #666;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid #e0e0e0;
+      border-top-color: #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
   `,
 })
-export class App {}
+export class App {
+  private readonly router = inject(Router);
+  protected readonly isNavigating = computed(() => this.router.currentNavigation() !== null);
+}
